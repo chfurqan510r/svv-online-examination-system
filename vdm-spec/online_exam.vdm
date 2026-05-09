@@ -1,0 +1,72 @@
+-- ============================================================
+-- FUNCTIONAL SPECIFICATION USING VDM-SL
+-- Online Examination System
+-- ============================================================
+
+types
+  StudentId = token;
+  ExamId    = token;
+
+-- ============================================================
+-- SYSTEM STATE
+-- ============================================================
+
+state OnlineExam of
+  students  : set of StudentId
+  loggedIn  : set of StudentId
+  submitted : map StudentId to set of ExamId
+
+inv mk_OnlineExam(st, lg, sub) ==
+  lg subset st
+  and dom sub subset st
+
+init s ==
+  s = mk_OnlineExam({}, {}, {|->})
+end
+
+-- ============================================================
+-- OPERATIONS
+-- ============================================================
+
+operations
+
+-- ------------------------------------------------------------
+-- LOGIN
+-- Precondition  : Student must be registered in the system.
+-- Postcondition : Student is added to the loggedIn set.
+-- ------------------------------------------------------------
+Login(s? : StudentId)
+ext wr loggedIn : set of StudentId
+    rd students : set of StudentId
+pre  s? in set students
+post loggedIn = loggedIn~ union {s?};
+
+-- ------------------------------------------------------------
+-- START EXAM
+-- Precondition  : Student must be logged in.
+-- Postcondition : The submitted map is unchanged (exam merely
+--                 started, not yet submitted).
+-- ------------------------------------------------------------
+StartExam(s? : StudentId, e? : ExamId)
+ext wr submitted : map StudentId to set of ExamId
+pre  s? in set loggedIn
+post submitted = submitted~;
+
+-- ------------------------------------------------------------
+-- SUBMIT EXAM
+-- Precondition  : Student must be logged in.
+-- Postcondition : If the student already has a submission
+--                 record, the exam is added to their set;
+--                 otherwise a new entry is created for them.
+-- ------------------------------------------------------------
+SubmitExam(s? : StudentId, e? : ExamId)
+ext wr submitted : map StudentId to set of ExamId
+pre  s? in set loggedIn
+post submitted =
+       if s? in set dom submitted~
+       then submitted~ ++ {s? |-> submitted~(s?) union {e?}}
+       else submitted~ munion {s? |-> {e?}};
+
+-- ============================================================
+-- END OF SPECIFICATION
+-- ============================================================
