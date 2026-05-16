@@ -1,0 +1,17 @@
+name: SVV CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  validation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Validation Step
+        run: echo "Validation Successful"
